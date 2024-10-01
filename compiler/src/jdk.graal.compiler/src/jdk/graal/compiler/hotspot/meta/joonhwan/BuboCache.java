@@ -2,8 +2,6 @@ package jdk.graal.compiler.hotspot.meta.joonhwan;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -14,11 +12,12 @@ import java.util.concurrent.atomic.AtomicLong;
         public static AtomicLong sampleCounter = new AtomicLong(0);
         public static final int SAMPLE_RATE = 100;
 
+
         static {
                 System.out.println("CACHE INITIALIZATION");
         }
 
-        ThreadLocalFields impl
+        //ThreadLocalFields impl
         public static void sampleTime(long id){
                 if(sampleCounter.getAndIncrement() % SAMPLE_RATE == 0){
                         long index = bufferIndex.getAndAdd(2);
