@@ -7,37 +7,27 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 
- public class BuboCache extends Thread {
+ public class MethodCallTargetBuffer {
 
         public static long[] Buffer = new long[9_000_000];
         public static AtomicLong bufferIndex = new AtomicLong(0);
         public static AtomicLong sampleCounter = new AtomicLong(0);
         public static final int SAMPLE_RATE = 100;
 
+        public static void sampleTime(long ID) {
+                if(sampleCounter.getAndIncrement() % SAMPLE_RATE == 0){
+                        timeBuffer.get().add(ID);
+                        timeBuffer.get().add(System.nanoTime());
+                }
+        }
+
         static {
                 System.out.println("CACHE INITIALIZATION");
         }
 
-        ThreadLocalFields impl
-        public static void sampleTime(long id){
-                if(sampleCounter.getAndIncrement() % SAMPLE_RATE == 0){
-                        long index = bufferIndex.getAndAdd(2);
-                        if (index + 1 < Buffer.length) {
-                                Buffer[(int) index] = id;
-                                Buffer[(int) index + 1] = System.nanoTime();
-                        } else {
-                        // TODO Handle buffer overflow,
-                        }
-                }
-        }
-
-        public static void test(){
-                System.out.println("CACHE TEST");
-        }
-
 
         public static void print() {
-                String fileName = "bubo_cache_output.csv";
+                String fileName = "./data/buffer_dump.csv";
                 try (FileWriter writer = new FileWriter(fileName)) {
                         writer.append("CompID,Start\n"); 
                         long currentIndex = bufferIndex.get();
