@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
  public class BuboCache extends Thread {
 
         public static long[] Buffer = new long[9_000_000];
-        public static AtomicLong bufferIndex = new AtomicLong(0);
-        public static AtomicLong sampleCounter = new AtomicLong(0);
+        public static volatile int bufferIndex = 0;
+        public static volatile int sampleCounter = 0;
         public static final int SAMPLE_RATE = 100;
 
 
@@ -18,17 +18,17 @@ import java.util.concurrent.atomic.AtomicLong;
         }
 
         //ThreadLocalFields impl
-        public static void sampleTime(long id){
-                if(sampleCounter.getAndIncrement() % SAMPLE_RATE == 0){
-                        long index = bufferIndex.getAndAdd(2);
-                        if (index + 1 < Buffer.length) {
-                                Buffer[(int) index] = id;
-                                Buffer[(int) index + 1] = System.nanoTime();
-                        } else {
-                        // TODO Handle buffer overflow,
-                        }
-                }
-        }
+        // public static void sampleTime(long id){
+        //         if(sampleCounter.getAndIncrement() % SAMPLE_RATE == 0){
+        //                 long index = bufferIndex.getAndAdd(2);
+        //                 if (index + 1 < Buffer.length) {
+        //                         Buffer[(int) index] = id;
+        //                         Buffer[(int) index + 1] = System.nanoTime();
+        //                 } else {
+        //                 // TODO Handle buffer overflow,
+        //                 }
+        //         }
+        // }
 
         public static void test(){
                 System.out.println("CACHE TEST");
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
                 String fileName = "bubo_cache_output.csv";
                 try (FileWriter writer = new FileWriter(fileName)) {
                         writer.append("CompID,Start\n"); 
-                        long currentIndex = bufferIndex.get();
+                        long currentIndex = bufferIndex;
                 
                         if (currentIndex % 2 != 0) {
                                 currentIndex--; // Adjust to the last complete pair

@@ -19,6 +19,7 @@ import jdk.graal.compiler.nodes.java.LoadFieldNode;
 import jdk.graal.compiler.nodes.java.StoreFieldNode;
 import jdk.graal.compiler.nodes.java.StoreIndexedNode;
 import jdk.graal.compiler.nodes.extended.BranchProbabilityNode;
+import jdk.graal.compiler.nodes.java.MethodCallTargetNode;
 
 import jdk.vm.ci.meta.JavaKind;
 import jdk.vm.ci.meta.JavaConstant;
@@ -33,8 +34,6 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
         "eclipse",    // Eclipse
         "fop",        // FOP
         "jfree",      // JFree
-        "menalto",    // Menalto
-        "sablecc",    // SableCC
         "xalan",       // Xalan
         "pmd"
         // Add other DaCapo benchmark names here

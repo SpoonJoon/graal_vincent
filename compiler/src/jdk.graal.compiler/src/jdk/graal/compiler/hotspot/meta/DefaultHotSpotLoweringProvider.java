@@ -30,6 +30,7 @@ import static jdk.graal.compiler.core.common.GraalOptions.OmitHotExceptionStackt
 import static jdk.graal.compiler.hotspot.meta.HotSpotForeignCallsProviderImpl.OSR_MIGRATION_END;
 import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.GENERIC_ARRAYCOPY;
 import static jdk.vm.ci.services.Services.IS_IN_NATIVE_IMAGE;
+
 import static org.graalvm.word.LocationIdentity.any;
 
 import java.util.Arrays;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import jdk.graal.compiler.serviceprovider.LibGraalService;
+
 import org.graalvm.word.LocationIdentity;
 
 import jdk.graal.compiler.core.common.CompressEncoding;
@@ -219,6 +221,9 @@ import jdk.vm.ci.meta.ResolvedJavaField;
 import jdk.vm.ci.meta.ResolvedJavaType;
 import jdk.vm.ci.meta.SpeculationLog;
 
+//Joonhwan 
+import jdk.graal.compiler.hotspot.meta.joonhwan.BuboCache;
+
 /**
  * HotSpot implementation of {@link LoweringProvider}.
  */
@@ -280,6 +285,9 @@ public abstract class DefaultHotSpotLoweringProvider extends DefaultJavaLowering
     protected RegisterFinalizerSnippets.Templates registerFinalizerSnippets;
     protected VirtualThreadUpdateJFRSnippets.Templates virtualThreadUpdateJFRSnippets;
 
+    //Joonhwan
+    // public BuboCache.Templates buboCacheSnippets;
+
     protected final Map<Class<? extends Node>, Extension> extensions = new HashMap<>();
 
     public DefaultHotSpotLoweringProvider(HotSpotGraalRuntimeProvider runtime, MetaAccessProvider metaAccess, ForeignCallsProvider foreignCalls, HotSpotRegistersProvider registers,
@@ -332,6 +340,10 @@ public abstract class DefaultHotSpotLoweringProvider extends DefaultJavaLowering
         objectSnippets = new ObjectSnippets.Templates(options, providers);
         unsafeSnippets = new UnsafeSnippets.Templates(options, providers);
         virtualThreadUpdateJFRSnippets = new VirtualThreadUpdateJFRSnippets.Templates(options, providers);
+
+        // Joonhwan
+        // buboCacheSnippets = new BuboCache.Templates(options,providers);
+        // replacements.registerSnippetTemplateCache(buboCacheSnippets);
 
         replacements.registerSnippetTemplateCache(new DigestBaseSnippets.Templates(options, providers));
 

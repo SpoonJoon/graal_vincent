@@ -44,8 +44,8 @@ import jdk.graal.compiler.phases.common.DisableOverflownCountedLoopsPhase;
 import jdk.graal.compiler.phases.common.DominatorBasedGlobalValueNumberingPhase;
 import jdk.graal.compiler.phases.common.HighTierLoweringPhase;
 import jdk.graal.compiler.phases.common.IterativeConditionalEliminationPhase;
-import jdk.graal.compiler.phases.common.MethodInstrumentationPhase;
-import jdk.graal.compiler.phases.common.SamplingForeignCallPhase;
+import jdk.graal.compiler.phases.common.MethodAtomicInstrumentationPhase;
+import jdk.graal.compiler.phases.common.MethodCallTargetSamplingPhase;
 import jdk.graal.compiler.phases.common.inlining.InliningPhase;
 import jdk.graal.compiler.phases.common.inlining.policy.GreedyInliningPolicy;
 import jdk.graal.compiler.phases.tiers.HighTierContext;
@@ -125,14 +125,16 @@ public class HighTier extends BaseTier<HighTierContext> {
 
         if (GraalOptions.EnableCustomIRProfiler.getValue(options)){
             // appendPhase(new MethodInstrumentationPhase());  
-            appendPhase(new MethodInstrumentationPhase());  
+            appendPhase(new MethodAtomicInstrumentationPhase());  
         }
 
-        if (GraalOptions.EnableForeignCallProfiler.getValue(options)){
-            // appendPhase(new MethodInstrumentationPhase());  
-            appendPhase(new SamplingForeignCallPhase());  
+        // if (GraalOptions.EnableForeignCallProfiler.getValue(options)){
+        //     // appendPhase(new MethodInstrumentationPhase());  
+        //     appendPhase(new SamplingForeignCallPhase());  
 
-        }
+        // }
+
+        // appendPhase(new MethodCallTargetSamplingPhase());
 
         appendPhase(new HighTierLoweringPhase(canonicalizer, true));
     }
