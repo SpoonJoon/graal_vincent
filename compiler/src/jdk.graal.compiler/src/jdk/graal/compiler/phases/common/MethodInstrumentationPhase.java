@@ -102,15 +102,14 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
             MergeNode merge = graph.add(new MergeNode());
             merge.addForwardEnd(instrumentationEnd);
             merge.addForwardEnd(skipEnd);
-
+            
             // Connect instrumentationBegin to startTime
             ForeignCallNode startTime = graph.add(new ForeignCallNode(JAVA_TIME_NANOS, ValueNode.EMPTY_ARRAY));
             graph.addAfterFixed(instrumentationBegin, startTime);
-
             LoadFieldNode readBuffer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("Buffer"))));
             graph.addAfterFixed(startTime, readBuffer);
             //Read Pointer of Buffer index
-            LoadFieldNode readPointer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("pointer"))));
+            LoadFieldNode readPointer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex"))));
             graph.addAfterFixed(readBuffer, readPointer);
             //Write to Buffer
             StoreIndexedNode writeToBufferID = graph.add(new StoreIndexedNode(readBuffer, readPointer, null, null, JavaKind.Long, idNode));
@@ -120,10 +119,18 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
             //Write startTime to Buffer
             StoreIndexedNode writeStartTime = graph.add(new StoreIndexedNode(readBuffer, incrementPointer, null, null, JavaKind.Long, startTime));
             graph.addAfterFixed(writeToBufferID, writeStartTime);
-           
-            StoreFieldNode writePointerBack = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("pointer")), incrementPointer));
+            // Increment pointer again
+            AddNode incrementPointer2 = graph.addWithoutUnique(new AddNode(incrementPointer, oneConstantNode));
+            //Update bufferIndex
+            StoreFieldNode writePointerBack = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex")), incrementPointer2));
             graph.addAfterFixed(writeStartTime, writePointerBack);
 
+            // SKIP instrumentation LOGIC
+            AddNode incSampleCount = graph.addWithoutUnique(new AddNode(loadSampleCounter, oneConstantNode));
+            StoreFieldNode writeIncCounter = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("sampleCounter")), incSampleCount));
+            graph.addAfterFixed(skipInstrumentationBegin, writeIncCounter);
+
+            //After the Load the sample counter -> ifNode
             loadSampleCounter.setNext(ifNode);
             merge.setNext(ogStartNext);
 
@@ -182,9 +189,10 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
             graph.addAfterFixed(predecessor, loadSampleCounter);
 
             ValueNode oneConstantNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1), StampFactory.forKind(JavaKind.Int)));
-            AddNode incSampleCount = graph.addWithoutUnique(new AddNode(loadSampleCounter, oneConstantNode));
-            StoreFieldNode writeIncCounter = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("sampleCounter")), incSampleCount));
-            graph.addAfterFixed(loadSampleCounter, writeIncCounter);
+            // Move sampleCounter increment to start
+            // AddNode incSampleCount = graph.addWithoutUnique(new AddNode(loadSampleCounter, oneConstantNode));
+            // StoreFieldNode writeIncCounter = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("sampleCounter")), incSampleCount));
+            // graph.addAfterFixed(loadSampleCounter, writeIncCounter);
 
             // MAGIC NUMBER ALERT
             ValueNode sampleRateNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1000), StampFactory.forKind(JavaKind.Int)));
@@ -207,20 +215,18 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
             LoadFieldNode readBuffer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("Buffer"))));
             graph.addAfterFixed(endTime, readBuffer);
             //Read Pointer of Buffer index
-            LoadFieldNode readPointer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("pointer"))));
+            LoadFieldNode readPointer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex"))));
             graph.addAfterFixed(readBuffer, readPointer);
-            //write compilationID to buffer at curGotrent ptr
-            AddNode pointerIncrement = graph.addWithoutUnique(new AddNode(readPointer, oneConstantNode));
-            StoreIndexedNode writeToBufferID = graph.add(new StoreIndexedNode(readBuffer, pointerIncrement, null, null, JavaKind.Long, idNode));
+            //write compilationID to buffer
+            StoreIndexedNode writeToBufferID = graph.add(new StoreIndexedNode(readBuffer, readPointer, null, null, JavaKind.Long, idNode));
             graph.addAfterFixed(readPointer, writeToBufferID);
             //increment ptr
-            AddNode pointerIncrement2 = graph.addWithoutUnique(new AddNode(pointerIncrement, oneConstantNode));
-            StoreIndexedNode writeEndTime = graph.add(new StoreIndexedNode(readBuffer, pointerIncrement2, null, null, JavaKind.Long, endTime));
+            AddNode pointerIncrement1 = graph.addWithoutUnique(new AddNode(readPointer, oneConstantNode));
+            StoreIndexedNode writeEndTime = graph.add(new StoreIndexedNode(readBuffer, pointerIncrement1, null, null, JavaKind.Long, endTime));
             graph.addAfterFixed(readPointer, writeEndTime);
             // Store incremented the pointer
-
-            AddNode pointerIncrement3 = graph.addWithoutUnique(new AddNode(pointerIncrement2, oneConstantNode));
-            StoreFieldNode writePointerBack = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("pointer")), pointerIncrement3));
+            AddNode pointerIncrement2 = graph.addWithoutUnique(new AddNode(pointerIncrement1, oneConstantNode));
+            StoreFieldNode writePointerBack = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex")), pointerIncrement2));
             graph.addAfterFixed(writeEndTime, writePointerBack);
             //reset counter
             ValueNode zeroConstantNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(0), StampFactory.forKind(JavaKind.Int)));
@@ -230,7 +236,8 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
             // =========================
             // Merge and Continue
             // =========================
-            writeIncCounter.setNext(ifNode);
+            // writeIncCounter.setNext(ifNode); //moved sampling logic upwards
+            loadSampleCounter.setNext(ifNode);
             merge.setNext(returnNode);
         } catch (Throwable e) {
             throw new RuntimeException("Instrumentation of return node failed: " + e.getMessage(), e);
