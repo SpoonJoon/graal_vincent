@@ -43,6 +43,10 @@ public final class GraalOptions {
     @Option(help = "Enable Energy Profiler", type = OptionType.Debug)
     public static final OptionKey<Boolean> EnableCustomIRProfiler = new OptionKey<>(false);
 
+    //Joonhwan
+    @Option(help = "Counter-based sampling rate", type = OptionType.Debug)
+    public static final OptionKey<Integer> SampleRate = new OptionKey<>(100);
+
     @Option(help = "Uses compiler intrinsifications.", type = OptionType.Expert)
     public static final OptionKey<Boolean> Intrinsify = new OptionKey<>(true);
 

@@ -24,6 +24,7 @@ import jdk.vm.ci.meta.JavaKind;
 import jdk.vm.ci.meta.JavaConstant;
 
 public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
+    private final int sampleRate;
  
     // Define the list of benchmark identifiers
     private static final List<String> BENCHMARK_NAMES = Arrays.asList(
@@ -50,7 +51,8 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
         return ALWAYS_APPLICABLE;
     }
 
-    public MethodInstrumentationPhase() {
+    public MethodInstrumentationPhase(int sampleRate) {
+        this.sampleRate=sampleRate;
     }
 
     @Override
@@ -90,7 +92,7 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
             // graph.addAfterFixed(loadSampleCounter, writeIncCounter);
 
             // Define the sampling rate (e.g., every 100 calls)
-            ValueNode sampleRateNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1000), StampFactory.forKind(JavaKind.Int)));
+            ValueNode sampleRateNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(sampleRate), StampFactory.forKind(JavaKind.Int)));
 
             // Compare the incremented counter with the sampling rate
             LogicNode shouldSample = graph.addWithoutUnique(new IntegerEqualsNode(loadSampleCounter, sampleRateNode));
@@ -150,6 +152,7 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
      */
     private boolean shouldInstrument(StructuredGraph graph) {
         String className = graph.method().getDeclaringClass().getName().replace('/', '.').toLowerCase();
+
         for (String benchmark : BENCHMARK_NAMES) {
             if (className.contains(benchmark.toLowerCase())) {
                 return true;
@@ -195,7 +198,7 @@ public class MethodInstrumentationPhase extends BasePhase<HighTierContext> {
             // graph.addAfterFixed(loadSampleCounter, writeIncCounter);
 
             // MAGIC NUMBER ALERT
-            ValueNode sampleRateNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1000), StampFactory.forKind(JavaKind.Int)));
+            ValueNode sampleRateNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(sampleRate), StampFactory.forKind(JavaKind.Int)));
 
             // Compare the incremented counter with the sampling rate
             LogicNode shouldSample = graph.addWithoutUnique(new IntegerEqualsNode(loadSampleCounter, sampleRateNode));

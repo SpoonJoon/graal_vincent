@@ -125,13 +125,13 @@ public class HighTier extends BaseTier<HighTierContext> {
 
         if (GraalOptions.EnableCustomIRProfiler.getValue(options)){
             // appendPhase(new MethodInstrumentationPhase());  
-            appendPhase(new MethodInstrumentationPhase());  
+            appendPhase(new MethodInstrumentationPhase(GraalOptions.SampleRate.getValue(options)));  
         }
 
         if (GraalOptions.EnableForeignCallProfiler.getValue(options)){
             // appendPhase(new MethodInstrumentationPhase());  
             appendPhase(new SamplingForeignCallPhase());  
-
+            
         }
 
         appendPhase(new HighTierLoweringPhase(canonicalizer, true));
