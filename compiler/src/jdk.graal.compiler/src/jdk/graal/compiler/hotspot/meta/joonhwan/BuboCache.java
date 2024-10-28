@@ -9,13 +9,9 @@ import java.io.IOException;
         public static long[] Buffer = new long[9_000_000];
         public static volatile int bufferIndex = 0;
         public static volatile int sampleCounter = 0;
-        // public static AtomicLong bufferIndex = new AtomicLong(0);
-        // public static AtomicLong sampleCounter = new AtomicLong(0);
-        public static final int SAMPLE_RATE = 100;
-
 
         static {
-                System.out.println("CACHE INITIALIZATION");
+                System.out.println("Method Profiling Buffer initialized");
         }
 
         //ThreadLocalFields impl

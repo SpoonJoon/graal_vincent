@@ -134,6 +134,11 @@ public class HighTier extends BaseTier<HighTierContext> {
             
         }
 
+        if (GraalOptions.EnableDVFS.getValue(options)){
+            // appendPhase(new MethodInstrumentationPhase());  
+            appendPhase(new SamplingForeignCallPhase());     
+        }
+
         appendPhase(new HighTierLoweringPhase(canonicalizer, true));
     }
 

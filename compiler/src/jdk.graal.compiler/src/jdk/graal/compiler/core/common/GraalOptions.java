@@ -44,8 +44,14 @@ public final class GraalOptions {
     public static final OptionKey<Boolean> EnableCustomIRProfiler = new OptionKey<>(false);
 
     //Joonhwan
+    @Option(help = "Enable Native DVFS Call", type = OptionType.Debug)
+    public static final OptionKey<Boolean> EnableDVFS = new OptionKey<>(false);
+
+    //Joonhwan
     @Option(help = "Counter-based sampling rate", type = OptionType.Debug)
     public static final OptionKey<Integer> SampleRate = new OptionKey<>(100);
+
+    
 
     @Option(help = "Uses compiler intrinsifications.", type = OptionType.Expert)
     public static final OptionKey<Boolean> Intrinsify = new OptionKey<>(true);
