@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.Arrays;
 import java.util.List;
 
-import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.DVFS_TEST;
+import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.JAVA_TIME_MILLIS;
 import jdk.graal.compiler.core.common.CompilationIdentifier.Verbosity;
 import jdk.graal.compiler.core.common.type.StampFactory;
 import jdk.graal.compiler.nodes.GraphState;
@@ -72,11 +72,11 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         Long id = Long.parseLong(graph.compilationId().toString(Verbosity.ID).split("-")[1]);
         ValueNode ID = graph.addWithoutUnique(new ConstantNode(JavaConstant.forLong(id), StampFactory.forKind(JavaKind.Long)));
         
-        ForeignCallNode startTime = graph.add(new ForeignCallNode(DVFS_TEST, ID));
+        ForeignCallNode startTime = graph.add(new ForeignCallNode(JAVA_TIME_MILLIS, ID));
         graph.addAfterFixed(graph.start(), startTime);
 
         for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
-            ForeignCallNode javaCurrentCPUtime = graph.add(new ForeignCallNode(DVFS_TEST, ID));
+            ForeignCallNode javaCurrentCPUtime = graph.add(new ForeignCallNode(JAVA_TIME_MILLIS, ID));
             graph.addBeforeFixed(returnNode, javaCurrentCPUtime);       
         }
     }
