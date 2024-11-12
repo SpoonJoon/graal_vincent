@@ -8,7 +8,7 @@
 
 ## Run using an agent that initializes the buffer
 
-mx -J-Djava.library.path=/workspace/graal/vincent vm -Dgraal.EnableCustomIRProfiler=true -Dgraal.SampleRate=1000 \
+mx -J-Djava.library.path=/workspace/graal/vincent vm -Dgraal.EnableDVFS=true -Dgraal.SampleRate=1000 \
     -Xmx10g \
     --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
     -javaagent:../joonhwan/agent-joon.jar \
