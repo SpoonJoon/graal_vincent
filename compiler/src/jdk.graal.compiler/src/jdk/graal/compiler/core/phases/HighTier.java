@@ -38,6 +38,7 @@ import jdk.graal.compiler.options.OptionValues;
 import jdk.graal.compiler.phases.common.BoxNodeIdentityPhase;
 import jdk.graal.compiler.phases.common.BoxNodeOptimizationPhase;
 import jdk.graal.compiler.phases.common.CanonicalizerPhase;
+import jdk.graal.compiler.phases.common.DVFSInjectionPhase;
 import jdk.graal.compiler.phases.common.DeadCodeEliminationPhase;
 import static jdk.graal.compiler.phases.common.DeadCodeEliminationPhase.Optionality.Optional;
 import jdk.graal.compiler.phases.common.DisableOverflownCountedLoopsPhase;
@@ -135,8 +136,7 @@ public class HighTier extends BaseTier<HighTierContext> {
         }
 
         if (GraalOptions.EnableDVFS.getValue(options)){
-            // appendPhase(new MethodInstrumentationPhase());  
-            appendPhase(new SamplingForeignCallPhase());     
+            appendPhase(new DVFSInjectionPhase());     
         }
 
         appendPhase(new HighTierLoweringPhase(canonicalizer, true));
