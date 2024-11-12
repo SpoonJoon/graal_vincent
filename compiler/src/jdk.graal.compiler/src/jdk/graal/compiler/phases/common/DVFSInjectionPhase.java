@@ -74,12 +74,8 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         }
 
         try{
-            //COMPILATION ID
-            Long id = Long.parseLong(graph.compilationId().toString(Verbosity.ID).split("-")[1]);
-            ValueNode ID = graph.addWithoutUnique(new ConstantNode(JavaConstant.forLong(id), StampFactory.forKind(JavaKind.Long)));
-            
-            ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(DVFS_TEST));
-            graph.addAfterFixed(graph.start(), dvfsTest);
+            // ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(DVFS_TEST));
+            // graph.addAfterFixed(graph.start(), dvfsTest);
 
             // FixedNode ogStartNext = graph.start().next();
 
@@ -101,6 +97,29 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
             // graph.addAfterFixed(writeDvfsResult, writePointerBack);
 
             // writePointerBack.setNext(ogStartNext);
+
+
+            FixedNode originalStartNext = graph.start().next();
+
+            // Create the nodes
+            ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(DVFS_TEST));
+            LoadFieldNode readBuffer = graph.add(LoadFieldNode.create(null, null,
+                context.getMetaAccess().lookupJavaField(BuboCache.class.getField("Buffer"))));
+            LoadFieldNode readPointer = graph.add(LoadFieldNode.create(null, null,
+                context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex"))));
+            ValueNode oneConstantNode = graph.unique(new ConstantNode(JavaConstant.forInt(1), StampFactory.forKind(JavaKind.Int)));
+            StoreIndexedNode writeDvfsResult = graph.add(new StoreIndexedNode(readBuffer, readPointer, null, null, JavaKind.Long, dvfsTest));
+            AddNode incrementPointer = graph.unique(new AddNode(readPointer, oneConstantNode));
+            StoreFieldNode writePointerBack = graph.add(new StoreFieldNode(null,
+                context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex")), incrementPointer));
+
+            // Link the nodes
+            graph.start().setNext(dvfsTest);
+            dvfsTest.setNext(readBuffer);
+            readBuffer.setNext(readPointer);
+            readPointer.setNext(writeDvfsResult);
+            writeDvfsResult.setNext(writePointerBack);
+            writePointerBack.setNext(originalStartNext);
 
             for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
                 ForeignCallNode javaCurrentCPUtime = graph.add(new ForeignCallNode(DVFS_TEST));
