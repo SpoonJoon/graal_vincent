@@ -51,7 +51,7 @@ import java.io.IOException;
                                 writer.append(String.format("%d,%d\n", compID, startTime));
                         }
                 
-                        System.out.println("CSV file '" + fileName + "' has been created successfully.");
+                        System.out.println("CSV file '" + fileName + "' has been created successfully. buffer index count:" + bufferIndex);
                 } catch (IOException e) {
                         System.err.println("An error occurred while writing to the CSV file: " + e.getMessage());
                 }
