@@ -69,59 +69,16 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
     @Override
     @SuppressWarnings("try")
     protected void run(StructuredGraph graph, HighTierContext context) {
-       
 
         if (!shouldInstrument(graph)) {
             return;
         }
 
-        try{
-            // Save original start next
-            FixedNode originalStartNext = graph.start().next();
-            // unlink graph.start() -> originalStartNext 
-            GraphUtil.unlinkFixedNode(graph.start());
+        ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(DVFS_TEST));
+        graph.addAfterFixed(graph.start(), dvfsTest);
 
-            // Create an instrumentation block
-            BeginNode instrumentationBegin = graph.add(new BeginNode());
-
-            // Create an end node for the instrumentation block
-            EndNode instrumentationEnd = graph.add(new EndNode());
-            instrumentationBegin.setNext(instrumentationEnd);
-
-            // Merge back into the main control flow
-            MergeNode merge = graph.add(new MergeNode());
-            merge.addForwardEnd(instrumentationEnd);
-            merge.setNext(originalStartNext);
-
-            // start -> instrumentaiton begin -> instrumentation end
-            graph.start().setNext(instrumentationBegin);
-          
-            // Create the nodes
-            ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(DVFS_TEST));
-            LoadFieldNode readBuffer = graph.add(LoadFieldNode.create(null, null,
-                context.getMetaAccess().lookupJavaField(BuboCache.class.getField("Buffer"))));
-            LoadFieldNode readPointer = graph.add(LoadFieldNode.create(null, null,
-                context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex"))));
-            ValueNode oneConstantNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1), StampFactory.forKind(JavaKind.Int)));
-            StoreIndexedNode writeDvfsResult = graph.add(new StoreIndexedNode(readBuffer, readPointer, null, null, JavaKind.Long, dvfsTest));
-            AddNode incrementPointer = graph.addWithoutUnique(new AddNode(readPointer, oneConstantNode));
-            StoreFieldNode writePointerBack = graph.add(new StoreFieldNode(null,
-                context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex")), incrementPointer));
-
-            // Link the nodes within the instrumentation block
-            instrumentationBegin.setNext(dvfsTest);
-            dvfsTest.setNext(readBuffer);
-            readBuffer.setNext(readPointer);
-            readPointer.setNext(writeDvfsResult);
-            writeDvfsResult.setNext(writePointerBack);
-            writePointerBack.setNext(instrumentationEnd);
-
-            for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
-                ForeignCallNode javaCurrentCPUtime = graph.add(new ForeignCallNode(DVFS_TEST));
-                graph.addBeforeFixed(returnNode, javaCurrentCPUtime);       
-            }
-        } catch (Throwable e){
-            throw new RuntimeException("Instrumentation failed" + e.getMessage(), e);
+        for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
+            graph.addBeforeFixed(returnNode, dvfsTest);       
         }
     }
 }
