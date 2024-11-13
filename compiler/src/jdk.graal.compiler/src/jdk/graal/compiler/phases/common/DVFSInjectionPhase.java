@@ -85,8 +85,8 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         // graph.addAfterFixed(graph.start(), dvfsTest);
 
         for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
-            ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(DVFS_TEST));
-            graph.addBeforeFixed(returnNode, dvfsTest);       
+            ForeignCallNode dvfsTestRet = graph.add(new ForeignCallNode(DVFS_TEST));
+            graph.addBeforeFixed(returnNode, dvfsTestRet);       
         }
     }
 }
