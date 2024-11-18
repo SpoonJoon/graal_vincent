@@ -1,18 +1,26 @@
 package joonhwan.agent;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
-// Agent to initialize buffer and add shutdown hook
 public class AgentJoon {
     private static final String BUFFER_CLASS = "jdk.graal.compiler.hotspot.meta.joonhwan.BuboCache";
 
     public static void premain(String agentArgs, Instrumentation inst) {
         initBuffer();
+        if (agentArgs != null) {
+            initMethodList(agentArgs);
+        }
         addShutdownHook();
     }
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
         initBuffer();
+        if (agentArgs != null) {
+            initMethodList(agentArgs);
+        }
         addShutdownHook();
     }
 
@@ -22,6 +30,21 @@ public class AgentJoon {
             System.out.println("VincentBuffer initialized successfully");
         } catch (Exception e) {
             System.err.println("Failed to initialize VincentBuffer: " + e.getMessage());
+        }
+    }
+
+    private static void initMethodList(String agentArgs) {
+        try {
+            Class<?> bufferClass = Class.forName(BUFFER_CLASS);
+            Method initMethodList = bufferClass.getMethod("initMethodList", List.class);
+
+            // Parse the arguments into a list of method names
+            List<String> methods = Arrays.asList(agentArgs.split(","));
+            initMethodList.invoke(null, methods);
+            System.out.println("Method list initialized with arguments: " + methods);
+        } catch (Exception e) {
+            System.err.println("Failed to initialize method list: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

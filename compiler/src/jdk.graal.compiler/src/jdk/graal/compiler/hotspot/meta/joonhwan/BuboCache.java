@@ -2,6 +2,8 @@ package jdk.graal.compiler.hotspot.meta.joonhwan;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
  public class BuboCache extends Thread {
@@ -9,6 +11,7 @@ import java.io.IOException;
         public static long[] Buffer = new long[9_000_000];
         public static volatile int bufferIndex = 0;
         public static volatile int sampleCounter = 0;
+        private static List<String> methodList = new ArrayList<>();
 
         static {
                 System.out.println("Method Profiling Buffer initialized");
@@ -26,6 +29,13 @@ import java.io.IOException;
                 //         }
                 // }
         }
+
+        public static void initMethodList(List<String> methods) {
+                methodList.clear();
+                methodList.addAll(methods);
+                System.out.println("Method list initialized: " + methodList);
+        }
+
 
         public static void test(){
                 System.out.println("CACHE TEST");

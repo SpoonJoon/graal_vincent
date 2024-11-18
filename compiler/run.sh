@@ -11,9 +11,11 @@
 mx -J-Djava.library.path=/workspace/graal/vincent vm -Dgraal.EnableDVFS=true -Dgraal.SampleRate=1000 \
     -Xmx10g \
     --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
-    -javaagent:../joonhwan/agent-joon.jar \
+    -javaagent:../joonhwan/agent-joon.jar=method1,method2,method3 \
     -jar ../dacapo/dacapo-9.12-bach.jar -n 1 sunflow
 
+## Syntax for passing methods into agent-joon
+# -javaagent:../joonhwan/agent-joon.jar=method1,method2,method3 \
 
 # mx -J-Djava.library.path=/workspace/graal/vincent vm \
 #     -XX:+PrintCompilation \
@@ -36,3 +38,4 @@ mx -J-Djava.library.path=/workspace/graal/vincent vm -Dgraal.EnableDVFS=true -Dg
 #   -XX:+UseJVMCICompiler  \
 #   jdk.internal.vm.compiler/org.graalvm.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
 #   FibTestd
+
