@@ -1,29 +1,19 @@
 package jdk.graal.compiler.phases.common;
 
-import java.util.Optional;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.DVFS_TEST;
-
-import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.JAVA_TIME_MILLIS;
-import jdk.graal.compiler.core.common.CompilationIdentifier.Verbosity;
-import jdk.graal.compiler.core.common.type.StampFactory;
+import jdk.graal.compiler.hotspot.meta.joonhwan.BuboCache;
+import jdk.graal.compiler.nodes.FixedNode;
+import jdk.graal.compiler.nodes.GraphState;
+import jdk.graal.compiler.nodes.ReturnNode;
+import jdk.graal.compiler.nodes.StructuredGraph;
 import jdk.graal.compiler.nodes.extended.ForeignCallNode;
+import jdk.graal.compiler.nodes.util.GraphUtil;
 import jdk.graal.compiler.phases.BasePhase;
 import jdk.graal.compiler.phases.tiers.HighTierContext;
-import jdk.graal.compiler.hotspot.meta.joonhwan.BuboCache;
-import jdk.graal.compiler.nodes.*;
-import jdk.graal.compiler.nodes.calc.*;
-import jdk.graal.compiler.phases.tiers.HighTierContext;
-import jdk.graal.compiler.nodes.java.LoadFieldNode;
-import jdk.graal.compiler.nodes.java.StoreFieldNode;
-import jdk.graal.compiler.nodes.java.StoreIndexedNode;
-import jdk.graal.compiler.nodes.util.GraphUtil;
-
-import jdk.vm.ci.meta.JavaKind;
-import jdk.vm.ci.meta.JavaConstant;
-import jdk.vm.ci.meta.ResolvedJavaField;
 
 
 public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
@@ -79,9 +69,6 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
             .replaceAll(";$", "");  // Remove trailing semicolon
     
         String targetMethodName = targetParts[targetParts.length - 1];
-    
-        System.out.println("Comparing: " + currentClassName + " vs " + targetClassName);
-        System.out.println("Methods: " + graph.method().getName() + " vs " + targetMethodName);
             
         if (currentClassName.equals(targetClassName) && 
             graph.method().getName().equals(targetMethodName)) {
