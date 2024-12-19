@@ -16,6 +16,7 @@ mx --java-home=/openjdk-21/build/linux-x86_64-server-release/images/jdk \
    -J-Djava.library.path=/workspace/graal/vincent:$EFLECT_EXPERIMENTS/resources/bin vm \
    --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
    -cp "$EFLECT_CP:$DEPS_CP" \
+   -javaagent:../joonhwan/agent-joon.jar=$TOP_METHODS \
    -Deflect.output=/workspace/graal_vincent/compiler/eflect-output \
    -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints \
    Harness sunflow \
