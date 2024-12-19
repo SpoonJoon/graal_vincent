@@ -11,7 +11,7 @@ import java.util.List;
         public static long[] Buffer = new long[9_000_000];
         public static volatile int bufferIndex = 0;
         public static volatile int sampleCounter = 0;
-        private static List<String> methodList = new ArrayList<>();
+        public static List<String> methodList = new ArrayList<>();
 
         static {
                 System.out.println("Method Profiling Buffer initialized");

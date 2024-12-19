@@ -11,7 +11,7 @@
 mx -J-Djava.library.path=/workspace/graal/vincent vm -Dgraal.EnableDVFS=true -Dgraal.SampleRate=1000 \
     -Xmx10g \
     --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
-    -javaagent:../joonhwan/agent-joon.jar=method1,method2,method3 \
+    -javaagent:../joonhwan/agent-joon.jar=org.sunflow.core.accel.KDTree.intersect \
     -jar ../dacapo/dacapo-9.12-bach.jar -n 1 sunflow
 
 ## Syntax for passing methods into agent-joon

@@ -66,11 +66,37 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         return false;
     }
 
+    private boolean shouldInstrumentDVFS(StructuredGraph graph) {
+        String targetMethod = BuboCache.methodList.get(0);
+        String[] targetParts = targetMethod.split("\\.");
+        
+        // Normalize and compare class and method names
+        String targetClassName = targetMethod.substring(0, targetMethod.lastIndexOf('.')).toLowerCase();
+        String currentClassName = graph.method().getDeclaringClass().getName()
+            .replace('/', '.')
+            .toLowerCase()
+            .replaceAll("^l", "")
+            .replaceAll(";$", "");  // Remove trailing semicolon
+    
+        String targetMethodName = targetParts[targetParts.length - 1];
+    
+        System.out.println("Comparing: " + currentClassName + " vs " + targetClassName);
+        System.out.println("Methods: " + graph.method().getName() + " vs " + targetMethodName);
+            
+        if (currentClassName.equals(targetClassName) && 
+            graph.method().getName().equals(targetMethodName)) {
+            System.out.println("Found target method: " + targetMethod);
+            return true;
+        }
+        
+        return false;
+    }
+
     @Override
     @SuppressWarnings("try")
     protected void run(StructuredGraph graph, HighTierContext context) {
 
-        if (!shouldInstrument(graph)) {
+        if (!shouldInstrumentDVFS(graph)) {
             return;
         }
         // Save original start next
