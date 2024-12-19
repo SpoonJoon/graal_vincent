@@ -103,7 +103,7 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             merge.addForwardEnd(skipEnd);
             
             // Connect instrumentationBegin to startTime
-            ForeignCallNode scaleCPUFreq = graph.add(new ForeignCallNode(DVFS_TEST);
+            ForeignCallNode scaleCPUFreq = graph.add(new ForeignCallNode(DVFS_TEST));
             graph.addAfterFixed(instrumentationBegin, scaleCPUFreq);
 
             // SKIP instrumentation LOGIC
@@ -116,7 +116,7 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             merge.setNext(ogStartNext);
 
             for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
-                instrumentReturnNode(graph, context, returnNode, startTime, idNode);
+                instrumentReturnNode(graph, context, returnNode, idNode);
             }
         } catch (Throwable e) {
             throw new RuntimeException("Instrumentation failed: " + e.getMessage(), e);
@@ -149,7 +149,7 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
      * @param startTime      the start time measurement node
      * @param idNode         the unique identifier node
      */
-    private void instrumentReturnNode(StructuredGraph graph, HighTierContext context, ReturnNode returnNode, ForeignCallNode startTime, ValueNode idNode) {
+    private void instrumentReturnNode(StructuredGraph graph, HighTierContext context, ReturnNode returnNode, ValueNode idNode) {
         try {
             FixedWithNextNode predecessor = (FixedWithNextNode) returnNode.predecessor();
             if (predecessor == null) {
