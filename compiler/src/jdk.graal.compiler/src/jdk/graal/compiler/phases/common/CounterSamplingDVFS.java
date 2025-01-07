@@ -58,10 +58,34 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
         this.DVFSFreq = cpufreq;
     }
 
+    private boolean shouldInstrumentDVFS(StructuredGraph graph) {
+        //This is loaded by a java agent
+        String targetMethod = BuboCache.methodList.get(0);
+        String[] targetParts = targetMethod.split("\\.");
+        
+        // Normalize and compare class and method names
+        String targetClassName = targetMethod.substring(0, targetMethod.lastIndexOf('.')).toLowerCase();
+        String currentClassName = graph.method().getDeclaringClass().getName()
+            .replace('/', '.')
+            .toLowerCase()
+            .replaceAll("^l", "")
+            .replaceAll(";$", "");  // Remove trailing semicolon
+    
+        String targetMethodName = targetParts[targetParts.length - 1];
+            
+        if (currentClassName.equals(targetClassName) && 
+            graph.method().getName().equals(targetMethodName)) {
+            System.out.println("Found target method: " + targetMethod);
+            return true;
+        }
+        
+        return false;
+    }
+
     @Override
     @SuppressWarnings("try")
     protected void run(StructuredGraph graph, HighTierContext context) {
-        if (!shouldInstrument(graph)) {
+        if (!shouldInstrumentDVFS(graph)) {
             return;
         }
 
@@ -125,32 +149,6 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
         }
     }
 
-    /**
-     * Determines whether the given graph should be instrumented.
-     *
-     * @param graph the structured graph representing the method
-     * @return {@code true} if the method should be instrumented, {@code false} otherwise
-     */
-    private boolean shouldInstrument(StructuredGraph graph) {
-        String className = graph.method().getDeclaringClass().getName().replace('/', '.').toLowerCase();
-
-        for (String benchmark : BENCHMARK_NAMES) {
-            if (className.contains(benchmark.toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Instruments a return node by adding timing and logging logic.
-     *
-     * @param graph          the structured graph
-     * @param context        the high tier context
-     * @param returnNode     the return node to instrument
-     * @param startTime      the start time measurement node
-     * @param idNode         the unique identifier node
-     */
     private void instrumentReturnNode(StructuredGraph graph, HighTierContext context, ReturnNode returnNode, ValueNode idNode) {
         try {
             FixedWithNextNode predecessor = (FixedWithNextNode) returnNode.predecessor();
