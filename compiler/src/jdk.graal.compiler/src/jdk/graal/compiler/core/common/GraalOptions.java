@@ -55,12 +55,12 @@ public final class GraalOptions {
     @Option(help = "Counter-based sampling rate", type = OptionType.Debug)
     public static final OptionKey<Integer> SampleRate = new OptionKey<>(100);
 
-
-    
+    //Joonhwan
+    @Option(help = "DVFS Scaling Frequency", type = OptionType.Debug)
+    public static final OptionKey<Integer> DVFSFrequency = new OptionKey<>(1600000);
 
     @Option(help = "Uses compiler intrinsifications.", type = OptionType.Expert)
     public static final OptionKey<Boolean> Intrinsify = new OptionKey<>(true);
-
 
     @Option(help = "", type = OptionType.Debug)
     public static final OptionKey<Boolean> ReduceCodeSize = new OptionKey<>(false);

@@ -140,7 +140,7 @@ public class HighTier extends BaseTier<HighTierContext> {
         }
 
         if (GraalOptions.EnableDVFSCounterSampling.getValue(options)){
-            appendPhase(new CounterSamplingDVFS());     
+            appendPhase(new CounterSamplingDVFS(GraalOptions.SampleRate.getValue(options), GraalOptions.DVFSFrequency.getValue(options)));     
         }
 
         appendPhase(new HighTierLoweringPhase(canonicalizer, true));
