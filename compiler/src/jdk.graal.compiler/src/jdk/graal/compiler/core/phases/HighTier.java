@@ -39,6 +39,7 @@ import jdk.graal.compiler.phases.common.BoxNodeIdentityPhase;
 import jdk.graal.compiler.phases.common.BoxNodeOptimizationPhase;
 import jdk.graal.compiler.phases.common.CanonicalizerPhase;
 import jdk.graal.compiler.phases.common.DVFSInjectionPhase;
+import jdk.graal.compiler.phases.common.CounterSamplingDVFS;
 import jdk.graal.compiler.phases.common.DeadCodeEliminationPhase;
 import static jdk.graal.compiler.phases.common.DeadCodeEliminationPhase.Optionality.Optional;
 import jdk.graal.compiler.phases.common.DisableOverflownCountedLoopsPhase;
