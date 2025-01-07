@@ -4,10 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.oracle.truffle.espresso.meta.JavaKind;
+
 // import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.DVFS_TEST;
 
+import jdk.graal.compiler.core.common.type.StampFactory;
 import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.SCALE_CPU_FREQ;
 import jdk.graal.compiler.hotspot.meta.joonhwan.BuboCache;
+import jdk.graal.compiler.nodes.ConstantNode;
 import jdk.graal.compiler.nodes.FixedNode;
 import jdk.graal.compiler.nodes.GraphState;
 import jdk.graal.compiler.nodes.ReturnNode;
@@ -17,7 +21,8 @@ import jdk.graal.compiler.nodes.extended.ForeignCallNode;
 import jdk.graal.compiler.nodes.util.GraphUtil;
 import jdk.graal.compiler.phases.BasePhase;
 import jdk.graal.compiler.phases.tiers.HighTierContext;
-
+import jdk.vm.ci.meta.JavaConstant;
+import jdk.vm.ci.meta.JavaKind;
 
 public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
 
@@ -95,7 +100,7 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         GraphUtil.unlinkFixedNode(graph.start());
 
         ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forLong(2200000000L), StampFactory.forKind(JavaKind.Long)));
-
+        
         ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
         graph.start().setNext(dvfsTest);
         dvfsTest.setNext(originalStartNext);
