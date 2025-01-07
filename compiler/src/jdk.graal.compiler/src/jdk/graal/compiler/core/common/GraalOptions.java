@@ -48,8 +48,13 @@ public final class GraalOptions {
     public static final OptionKey<Boolean> EnableDVFS = new OptionKey<>(false);
 
     //Joonhwan
+    @Option(help = "Enable Counter Based DVFS Optimizations", type = OptionType.Debug)
+    public static final OptionKey<Boolean> EnableDVFSCounterSampling = new OptionKey<>(false);
+
+    //Joonhwan
     @Option(help = "Counter-based sampling rate", type = OptionType.Debug)
     public static final OptionKey<Integer> SampleRate = new OptionKey<>(100);
+
 
     
 

@@ -3,7 +3,7 @@ package jdk.graal.compiler.phases.common;
 import java.util.Arrays;
 import java.util.List;
 
-import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.DVFS_TEST;
+import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.SCALE_CPU_FREQ;
 import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.JAVA_TIME_NANOS;
 
 import java.util.Optional;
@@ -102,8 +102,10 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             merge.addForwardEnd(instrumentationEnd);
             merge.addForwardEnd(skipEnd);
             
+            // scaling frequency TODO parametrize this
+            ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1600000), StampFactory.forKind(JavaKind.Int)));
             // Connect instrumentationBegin to startTime
-            ForeignCallNode scaleCPUFreq = graph.add(new ForeignCallNode(DVFS_TEST));
+            ForeignCallNode scaleCPUFreq = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
             graph.addAfterFixed(instrumentationBegin, scaleCPUFreq);
 
             // SKIP instrumentation LOGIC
@@ -170,13 +172,12 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             LoadFieldNode loadSampleCounter = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("sampleCounter"))));
             graph.addAfterFixed(predecessor, loadSampleCounter);
 
+
             ValueNode oneConstantNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1), StampFactory.forKind(JavaKind.Int)));
             // Move sampleCounter increment to start
             // AddNode incSampleCount = graph.addWithoutUnique(new AddNode(loadSampleCounter, oneConstantNode));
             // StoreFieldNode writeIncCounter = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("sampleCounter")), incSampleCount));
             // graph.addAfterFixed(loadSampleCounter, writeIncCounter);
-
-            // MAGIC NUMBER ALERT
             ValueNode sampleRateNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(sampleRate), StampFactory.forKind(JavaKind.Int)));
 
             // Compare the incremented counter with the sampling rate
@@ -190,8 +191,9 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             merge.addForwardEnd(instrumentationEnd);
             merge.addForwardEnd(skipEnd);
 
+            ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1600000), StampFactory.forKind(JavaKind.Int)));
             // Connect instrumentationBegin to startTime
-            ForeignCallNode endTime = graph.add(new ForeignCallNode(JAVA_TIME_NANOS, ValueNode.EMPTY_ARRAY));
+            ForeignCallNode endTime = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
             graph.addAfterFixed(instrumentationBegin, endTime);
             //Read Buffer to write ID, startTime, and endTime
             LoadFieldNode readBuffer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("Buffer"))));
