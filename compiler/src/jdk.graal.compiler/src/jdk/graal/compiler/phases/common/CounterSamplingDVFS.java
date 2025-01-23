@@ -127,7 +127,7 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             merge.addForwardEnd(skipEnd);
             
             // scaling frequency TODO parametrize this
-            ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1600000), StampFactory.forKind(JavaKind.Int)));
+            ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(DVFSFreq), StampFactory.forKind(JavaKind.Int)));
             // Connect instrumentationBegin to startTime
             ForeignCallNode scaleCPUFreq = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
             graph.addAfterFixed(instrumentationBegin, scaleCPUFreq);
@@ -172,10 +172,6 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
 
 
             // ValueNode oneConstantNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1), StampFactory.forKind(JavaKind.Int)));
-            // Move sampleCounter increment to start
-            // AddNode incSampleCount = graph.addWithoutUnique(new AddNode(loadSampleCounter, oneConstantNode));
-            // StoreFieldNode writeIncCounter = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("sampleCounter")), incSampleCount));
-            // graph.addAfterFixed(loadSampleCounter, writeIncCounter);
             ValueNode sampleRateNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(this.sampleRate), StampFactory.forKind(JavaKind.Int)));
 
             // Compare the incremented counter with the sampling rate
@@ -193,24 +189,7 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             // Connect instrumentationBegin to startTime
             ForeignCallNode endTime = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
             graph.addAfterFixed(instrumentationBegin, endTime);
-            //Read Buffer to write ID, startTime, and endTime
-            // LoadFieldNode readBuffer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("Buffer"))));
-            // graph.addAfterFixed(endTime, readBuffer);
-            // //Read Pointer of Buffer index
-            // LoadFieldNode readPointer = graph.add(LoadFieldNode.create(null, null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex"))));
-            // graph.addAfterFixed(readBuffer, readPointer);
-            // //write compilationID to buffer
-            // StoreIndexedNode writeToBufferID = graph.add(new StoreIndexedNode(readBuffer, readPointer, null, null, JavaKind.Long, idNode));
-            // graph.addAfterFixed(readPointer, writeToBufferID);
-            // //increment ptr
-            // AddNode pointerIncrement1 = graph.addWithoutUnique(new AddNode(readPointer, oneConstantNode));
-            // StoreIndexedNode writeEndTime = graph.add(new StoreIndexedNode(readBuffer, pointerIncrement1, null, null, JavaKind.Long, endTime));
-            // graph.addAfterFixed(readPointer, writeEndTime);
-            // // Store incremented the pointer
-            // AddNode pointerIncrement2 = graph.addWithoutUnique(new AddNode(pointerIncrement1, oneConstantNode));
-            // StoreFieldNode writePointerBack = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("bufferIndex")), pointerIncrement2));
-            // graph.addAfterFixed(writeEndTime, writePointerBack);
-            //reset counter
+           
             ValueNode zeroConstantNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(0), StampFactory.forKind(JavaKind.Int)));
             StoreFieldNode resetCounter = graph.add(new StoreFieldNode(null, context.getMetaAccess().lookupJavaField(BuboCache.class.getField("sampleCounter")), zeroConstantNode));
             graph.addAfterFixed(endTime, resetCounter);
