@@ -98,7 +98,7 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         // unlink graph.start() -> originalStartNext 
         GraphUtil.unlinkFixedNode(graph.start());
 
-        ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forLong(2200000000L), StampFactory.forKind(JavaKind.Long)));
+        ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1600000), StampFactory.forKind(JavaKind.Long)));
         
         ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
         graph.start().setNext(dvfsTest);
