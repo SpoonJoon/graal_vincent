@@ -136,7 +136,7 @@ public class HighTier extends BaseTier<HighTierContext> {
 
         //TODO add cpufrequency as graal optiona 
         if (GraalOptions.EnableDVFS.getValue(options)){
-            appendPhase(new DVFSInjectionPhase());     
+            appendPhase(new DVFSInjectionPhase(GraalOptions.SampleRate.getValue(options)));     
         }
 
         if (GraalOptions.EnableDVFSCounterSampling.getValue(options)){

@@ -24,21 +24,22 @@ import jdk.vm.ci.meta.JavaConstant;
 import jdk.vm.ci.meta.JavaKind;
 
 public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
+    private final int sampleRate;
 
     //TODO: make this an argument..?
-    private static final List<String> BENCHMARK_NAMES = Arrays.asList(
-        "sunflow",    // Sunflow
-        "batik",      // Batik
-        "derby",      // Derby
-        "eclipse",    // Eclipse
-        "fop",        // FOP
-        "jfree",      // JFree
-        "menalto",    // Menalto
-        "sablecc",    // SableCC
-        "xalan",       // Xalan
-        "pmd"
-        // Add other DaCapo benchmark names here
-    );
+    // private static final List<String> BENCHMARK_NAMES = Arrays.asList(
+    //     "sunflow",    // Sunflow
+    //     "batik",      // Batik
+    //     "derby",      // Derby
+    //     "eclipse",    // Eclipse
+    //     "fop",        // FOP
+    //     "jfree",      // JFree
+    //     "menalto",    // Menalto
+    //     "sablecc",    // SableCC
+    //     "xalan",       // Xalan
+    //     "pmd"
+    //     // Add other DaCapo benchmark names here
+    // );
 
     @Override
     public boolean checkContract() {
@@ -50,18 +51,19 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         return ALWAYS_APPLICABLE;
     }
 
-    public DVFSInjectionPhase() {
+    public DVFSInjectionPhase(int sampleRate) {
+        this.sampleRate=sampleRate;
     }
 
-    private boolean shouldInstrument(StructuredGraph graph) {
-        String className = graph.method().getDeclaringClass().getName().replace('/', '.').toLowerCase();
-        for (String benchmark : BENCHMARK_NAMES) {
-            if (className.contains(benchmark.toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
-    }
+    // private boolean shouldInstrument(StructuredGraph graph) {
+    //     String className = graph.method().getDeclaringClass().getName().replace('/', '.').toLowerCase();
+    //     for (String benchmark : BENCHMARK_NAMES) {
+    //         if (className.contains(benchmark.toLowerCase())) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     private boolean shouldInstrumentDVFS(StructuredGraph graph) {
         String targetMethod = BuboCache.methodList.get(0);
@@ -95,10 +97,8 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         }
         // Save original start next
         FixedNode originalStartNext = graph.start().next();
-        // unlink graph.start() -> originalStartNext 
         GraphUtil.unlinkFixedNode(graph.start());
-
-        ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1600000), StampFactory.forKind(JavaKind.Long)));
+        ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(sampleRate), StampFactory.forKind(JavaKind.Long)));
         
         ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
         graph.start().setNext(dvfsTest);
