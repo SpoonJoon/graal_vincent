@@ -23,6 +23,12 @@ import jdk.graal.compiler.phases.tiers.HighTierContext;
 import jdk.vm.ci.meta.JavaConstant;
 import jdk.vm.ci.meta.JavaKind;
 
+//Framestate related imports
+import jdk.graal.compiler.nodes.FrameState;
+import jdk.vm.ci.code.BytecodeFrame;
+import jdk.graal.compiler.bytecode.Bytecode;
+import jdk.graal.compiler.bytecode.ResolvedJavaMethodBytecode;
+
 public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
     private final int sampleRate;
 
@@ -113,6 +119,7 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
 
         for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
             ForeignCallNode dvfsTestRet = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
+            Bytecode code = new ResolvedJavaMethodBytecode(graph.method());
             FrameState stateAfter = new FrameState(null, code, BytecodeFrame.AFTER_BCI, ValueNode.EMPTY_ARRAY, ValueNode.EMPTY_ARRAY, 0, null, null, ValueNode.EMPTY_ARRAY, null,
                                         FrameState.StackState.BeforePop);
             dvfsTestRet.setStateAfter(graph.add(stateAfter));
