@@ -98,10 +98,14 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         // Save original start next
         FixedNode originalStartNext = graph.start().next();
         GraphUtil.unlinkFixedNode(graph.start());
-        ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(sampleRate), StampFactory.forKind(JavaKind.Long)));
         
+        ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(sampleRate), StampFactory.forKind(JavaKind.Long)));
         ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
-        graph.start().setNext(dvfsTest);
+        dvfsTest.setStateAfter(graph.start().stateAfter());
+        // dvfsTest.setGuard(graph.start().guardAnchor());
+        graph.addAfterFixed(graph.start(), dvfsTest);
+        // graph.start().setNext(dvfsTest);
+
         dvfsTest.setNext(originalStartNext);
 
         // ForeignCallNode dvfsTest = graph.add(new ForeignCallNode(DVFS_TEST));
@@ -109,6 +113,12 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
 
         for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
             ForeignCallNode dvfsTestRet = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
+            FrameState stateAfter = new FrameState(null, code, BytecodeFrame.AFTER_BCI, ValueNode.EMPTY_ARRAY, ValueNode.EMPTY_ARRAY, 0, null, null, ValueNode.EMPTY_ARRAY, null,
+                                        FrameState.StackState.BeforePop);
+            dvfsTestRet.setStateAfter(graph.add(stateAfter));
+            // dvfsTestRet.setStateAfter(returnNode.stateAfter());
+            // dvfsTestRet.setGuard(returnNode.guardAnchor());
+
             graph.addBeforeFixed(returnNode, dvfsTestRet);       
         }
     }
