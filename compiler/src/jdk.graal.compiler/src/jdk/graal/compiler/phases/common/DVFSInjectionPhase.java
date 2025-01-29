@@ -1,17 +1,15 @@
 package jdk.graal.compiler.phases.common;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
-
-// import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.DVFS_TEST;
-
+import jdk.graal.compiler.bytecode.Bytecode;
+import jdk.graal.compiler.bytecode.ResolvedJavaMethodBytecode;
 import jdk.graal.compiler.core.common.type.StampFactory;
 import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.SCALE_CPU_FREQ;
 import jdk.graal.compiler.hotspot.meta.joonhwan.BuboCache;
 import jdk.graal.compiler.nodes.ConstantNode;
 import jdk.graal.compiler.nodes.FixedNode;
+import jdk.graal.compiler.nodes.FrameState;
 import jdk.graal.compiler.nodes.GraphState;
 import jdk.graal.compiler.nodes.ReturnNode;
 import jdk.graal.compiler.nodes.StructuredGraph;
@@ -20,32 +18,10 @@ import jdk.graal.compiler.nodes.extended.ForeignCallNode;
 import jdk.graal.compiler.nodes.util.GraphUtil;
 import jdk.graal.compiler.phases.BasePhase;
 import jdk.graal.compiler.phases.tiers.HighTierContext;
-import jdk.vm.ci.meta.JavaConstant;
-import jdk.vm.ci.meta.JavaKind;
-
-//Framestate related imports
-import jdk.graal.compiler.nodes.FrameState;
 import jdk.vm.ci.code.BytecodeFrame;
-import jdk.graal.compiler.bytecode.Bytecode;
-import jdk.graal.compiler.bytecode.ResolvedJavaMethodBytecode;
 
 public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
     private final int sampleRate;
-
-    //TODO: make this an argument..?
-    // private static final List<String> BENCHMARK_NAMES = Arrays.asList(
-    //     "sunflow",    // Sunflow
-    //     "batik",      // Batik
-    //     "derby",      // Derby
-    //     "eclipse",    // Eclipse
-    //     "fop",        // FOP
-    //     "jfree",      // JFree
-    //     "menalto",    // Menalto
-    //     "sablecc",    // SableCC
-    //     "xalan",       // Xalan
-    //     "pmd"
-    //     // Add other DaCapo benchmark names here
-    // );
 
     @Override
     public boolean checkContract() {
@@ -61,16 +37,6 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         this.sampleRate=sampleRate;
     }
 
-    // private boolean shouldInstrument(StructuredGraph graph) {
-    //     String className = graph.method().getDeclaringClass().getName().replace('/', '.').toLowerCase();
-    //     for (String benchmark : BENCHMARK_NAMES) {
-    //         if (className.contains(benchmark.toLowerCase())) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
     private boolean shouldInstrumentDVFS(StructuredGraph graph) {
         String targetMethod = BuboCache.methodList.get(0);
         String[] targetParts = targetMethod.split("\\.");
@@ -83,14 +49,12 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
             .replaceAll("^l", "")
             .replaceAll(";$", "");  // Remove trailing semicolon
     
-        String targetMethodName = targetParts[targetParts.length - 1];
-            
+        String targetMethodName = targetParts[targetParts.length - 1];   
         if (currentClassName.equals(targetClassName) && 
             graph.method().getName().equals(targetMethodName)) {
             System.out.println("Found target method: " + targetMethod);
             return true;
         }
-        
         return false;
     }
 
