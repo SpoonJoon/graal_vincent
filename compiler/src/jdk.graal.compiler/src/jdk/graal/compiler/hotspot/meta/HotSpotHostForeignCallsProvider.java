@@ -183,7 +183,7 @@ public abstract class HotSpotHostForeignCallsProvider extends HotSpotForeignCall
 
     public static final HotSpotForeignCallDescriptor DVFS_TEST = new HotSpotForeignCallDescriptor(LEAF_NO_VZERO, NO_SIDE_EFFECT, NO_LOCATIONS, "dvfsTest", long.class);
 
-    public static final HotSpotForeignCallDescriptor SCALE_CPU_FREQ = new HotSpotForeignCallDescriptor(SAFEPOINT, HAS_SIDE_EFFECT, NO_LOCATIONS, "scaleCpuFreq", long.class, long.class);
+    public static final HotSpotForeignCallDescriptor SCALE_CPU_FREQ = new HotSpotForeignCallDescriptor(LEAF, HAS_SIDE_EFFECT, NO_LOCATIONS, "scaleCpuFreq", long.class, long.class);
     // public static final HotSpotForeignCallDescriptor SCALE_CPU_FREQ = new HotSpotForeignCallDescriptor(LEAF_NO_VZERO, HAS_SIDE_EFFECT, NO_LOCATIONS, "scaleCpuFreq", long.class, long.class);
 
     public static final HotSpotForeignCallDescriptor NOTIFY = new HotSpotForeignCallDescriptor(LEAF_NO_VZERO, HAS_SIDE_EFFECT, any(), "object_notify", int.class, Word.class, Object.class);
