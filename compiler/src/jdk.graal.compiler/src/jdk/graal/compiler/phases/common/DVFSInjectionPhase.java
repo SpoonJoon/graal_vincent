@@ -20,6 +20,9 @@ import jdk.graal.compiler.phases.BasePhase;
 import jdk.graal.compiler.phases.tiers.HighTierContext;
 import jdk.vm.ci.code.BytecodeFrame;
 
+import jdk.vm.ci.meta.JavaKind;
+import jdk.vm.ci.meta.JavaConstant;
+
 public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
     private final int sampleRate;
 
