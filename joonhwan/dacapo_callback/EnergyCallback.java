@@ -30,7 +30,7 @@ public class EnergyCallback extends Callback {
             long endTimeNs = System.nanoTime();
             double elapsedSecs = (endTimeNs - startTimeNs) / 1e9;
 
-            System.out.printf("Iteration #%d (post-warmup): Time=%.3f s, Energy=%d µJ%n",
+            System.out.printf("Iteration #%d (post-warmup): Time=%.3f s, Energy=%d uJ%n",
                             iterationNum, elapsedSecs, energyUsed);
         }
     }
