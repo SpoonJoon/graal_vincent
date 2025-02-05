@@ -12,28 +12,26 @@ public class EnergyCallback extends Callback {
   }
 
   @Override
-  protected void start(String benchmark, boolean warmup) {
-    System.out.println("Starting " + (warmup ? "warm-up" : "FR") + " iteration for " + benchmark + ".");
+  public void start(String benchmark) {
+    System.out.println("Starting " + (isWarmup() ? "warm-up" : "FR") + " iteration for " + benchmark + ".");
     startTimeNs = System.nanoTime();
     startEnergy = RaplPowercap.getRaplEnergyMicroJoules();
-    super.start(benchmark, warmup);
+    super.start(benchmark);
   }
 
   @Override
-  public void stop(long duration, boolean warmup) {
-    super.stop(duration, warmup);
-    long endTimeNs = System.nanoTime();
-    long endEnergy = RaplPowercap.getRaplEnergyMicroJoules();
-    long elapsedNs = endTimeNs - startTimeNs;
-    long energyUsed = endEnergy - startEnergy;
-    System.out.printf("%s iteration complete: Harness duration = %d ms, Elapsed time = %d ns, Energy used = %d micro joules%n",
-                      (warmup ? "Warm-up" : "FR"), duration, elapsedNs, energyUsed);
+  public void stop(long duration) {
+    super.stop(duration);
+    long elapsedNs = System.nanoTime() - startTimeNs;
+    long energyUsed = RaplPowercap.getRaplEnergyMicroJoules() - startEnergy;
+    System.out.printf("%s iteration: Duration = %d ms, Elapsed = %d ns, Energy = %d micro Joules%n",
+                      (isWarmup() ? "Warm-up" : "FR"), duration, elapsedNs, energyUsed);
   }
 
   @Override
-  protected void complete(String benchmark, boolean valid, boolean warmup) {
-    super.complete(benchmark, valid, warmup);
+  public void complete(String benchmark, boolean valid) {
+    super.complete(benchmark, valid);
     System.out.println("Callback complete: " + benchmark + " " + (valid ? "PASSED" : "FAILED") +
-                       " (" + (warmup ? "warm-up" : "FR") + ")");
+                       " (" + (isWarmup() ? "warm-up" : "FR") + ")");
   }
 }
