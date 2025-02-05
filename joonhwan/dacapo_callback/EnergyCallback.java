@@ -1,38 +1,58 @@
+package joonhwan.dacapo_callback; 
+
 import org.dacapo.harness.Callback;
-import org.dacapo.harness.Benchmark;
-import org.dacapo.harness.Config;
+import org.dacapo.harness.CommandLineArgs;
 
+//Note to future self: sample callback is implemented https://github.com/dacapobench/dacapobench/blob/9.12-bach/benchmarks/harness/src/MyCallback.java
 public class EnergyCallback extends Callback {
+  private long startTimeNs;
+  private long startEnergy;
 
-    private long startEnergy;
-    private long startTimeNs;
+  public EnergyCallback(CommandLineArgs args) {
+    super(args);
+  }
 
-    @Override
-    public void iterationStart(Benchmark benchmark, Config config) {
-        super.iterationStart(benchmark, config);
+  /**
+   * Called immediately prior to the start of the benchmark.
+   * Note: the working example uses start(String benchmark) only.
+   */
+  @Override
+  public void start(String benchmark) {
 
-        // Only measure if we're not in a warmup iteration
-        if (config.getIteration() >= config.getWarmups()) {
-            startTimeNs = System.nanoTime();
-            startEnergy = RaplPowercap.getRaplEnergyMicroJoules();
-        }
-    }
+    System.out.println("===== Starting " + (isWarmup() ? "WARMUP" : "TIMING") +
+                       " iteration for " + benchmark + " =====");
 
-    @Override
-    public void iterationEnd(Benchmark benchmark, boolean valid) {
-        super.iterationEnd(benchmark, valid);
+    startTimeNs = System.nanoTime();
+    startEnergy = RaplPowercap.getEnergyMicrojoules();
 
-        int iterationNum = benchmark.getConfig().getIteration();
-        if (iterationNum >= benchmark.getConfig().getWarmups()) {
-            long endEnergy = RaplPowercap.getRaplEnergyMicroJoules();
-            long energyUsed = endEnergy - startEnergy;
+    super.start(benchmark);
+  }
 
-            long endTimeNs = System.nanoTime();
-            double elapsedSecs = (endTimeNs - startTimeNs) / 1e9;
+  /**
+   * Called immediately after the benchmark finishes.
+   * The harness passes the duration (in ms).
+   */
+  @Override
+  public void stop(long duration) {
 
-            System.out.printf("Iteration #%d (post-warmup): Time=%.3f s, Energy=%d uJ%n",
-                            iterationNum, elapsedSecs, energyUsed);
-        }
-    }
+    super.stop(duration);
 
+    long endTimeNs = System.nanoTime();
+    long endEnergy = RaplPowercap.getEnergyMicrojoules();
+    
+    long elapsedNs  = endTimeNs - startTimeNs;
+    long energyUsed = endEnergy - startEnergy;
+
+    System.out.printf("Iteration end: Warmup=%b, HarnessDuration=%d ms, MeasuredTime=%d nanoseconds, EnergyUsed=%d microjoules%n",
+                      isWarmup(), duration, elapsedNs, energyUsed);
+  }
+
+  /**
+   * Called after stop(). In the default harness, this prints pass/fail info.
+   */
+  @Override
+  public void complete(String benchmark, boolean valid) {
+    super.complete(benchmark, valid);
+    System.out.println("Callback complete: " + benchmark + " " + (valid ? "PASSED" : "FAILED"));
+  }
 }
