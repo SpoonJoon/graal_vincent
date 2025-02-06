@@ -1,13 +1,13 @@
 #!/bin/bash
 # run-all-methods.sh
 
-# Set paths
 EFLECT_HOME=/workspace/eflect
 EFLECT_EXPERIMENTS=$EFLECT_HOME/experiments
 DEPS_DIR=$EFLECT_EXPERIMENTS/resources/jar
+CALLBACK_DIR=/workspace/graal_vincent/joonhwan
 
-EFLECT_CP="$EFLECT_EXPERIMENTS/eflect-experiments.jar:$EFLECT_HOME/eflect.jar"
-DEPS_CP="$DEPS_DIR/dacapo.jar:$DEPS_DIR/async-profiler.jar"
+# PREREQ: Dacapo from eflect and energy-callback need to be built
+DEPS_CP="$DEPS_DIR/dacapo.jar:$CALLBACK_DIR/energy-callback.jar"
 
 AVAILABLE_FREQS=(2201000 2200000 2100000 2000000 1900000 1800000 1700000 1600000 1500000 1400000 1300000 1200000)
 ITERATIONS=10
