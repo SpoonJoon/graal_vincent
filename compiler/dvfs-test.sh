@@ -4,27 +4,25 @@
 EFLECT_HOME=/workspace/eflect
 EFLECT_EXPERIMENTS=$EFLECT_HOME/experiments
 DEPS_DIR=$EFLECT_EXPERIMENTS/resources/jar
+CALLBACK_DIR=/workspace/graal_vincent/joonhwan
 
-# Simplify classpath to match the working example
-EFLECT_CP="$EFLECT_EXPERIMENTS/eflect-experiments.jar:$EFLECT_HOME/eflect.jar"
-DEPS_CP="$DEPS_DIR/dacapo.jar:$DEPS_DIR/async-profiler.jar"
+# PREREQ: Dacapo from eflect and energy-callback need to be built
+DEPS_CP="$DEPS_DIR/dacapo.jar:$CALLBACK_DIR/energy-callback.jar"
 
-# Create output directory
-mkdir -p /workspace/graal_vincent/compiler/eflect-output
+BENCHMARK=sunflow
+ITERATIONS=10
+TARGET_METHOD=org.sunflow.core.Ray.transform
 
-TOP_METHODS=org.sunflow.core.Ray.transform
-
+    
 mx --java-home=/openjdk-21/build/linux-x86_64-server-release/images/jdk \
    -J-Djava.library.path=/workspace/graal/vincent:$EFLECT_EXPERIMENTS/resources/bin \
    vm \
    -Dgraal.EnableDVFSCounterSampling=true -Dgraal.SampleRate=1000\
+   -javaagent:../joonhwan/agent-joon.jar=$TARGET_METHOD \
    --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
-   -cp "$EFLECT_CP:$DEPS_CP" \
-   -javaagent:../joonhwan/agent-joon.jar=$TOP_METHODS \
-   -Deflect.output=/workspace/graal_vincent/compiler/eflect-output \
-   -XX:+UnlockDiagnosticVMOptions \
-   -XX:+DebugNonSafepoints \
+   -cp "$DEPS_CP" \
    Harness \
-   sunflow -n 5 -c eflect.experiments.ChappieEflectCallback \
-   --no-validation
+   -c joonhwan.dacapo_callback.EnergyCallback \
+   "$BENCHMARK" -n $ITERATIONS
+
 
