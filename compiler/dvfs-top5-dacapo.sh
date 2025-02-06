@@ -10,6 +10,8 @@ CALLBACK_DIR=/workspace/graal_vincent/joonhwan
 DEPS_CP="$DEPS_DIR/dacapo.jar:$CALLBACK_DIR/energy-callback.jar"
 
 AVAILABLE_FREQS=(2201000 2200000 2100000 2000000 1900000 1800000 1700000 1600000 1500000 1400000 1300000 1200000)
+DEFAULT_SAMPLING_RATES=(100 1000 10000)
+SUNFLOW_SAMPLING_RATES=(1000 10000 100000 500000)
 ITERATIONS=10
 
 # Create output directory
@@ -26,33 +28,39 @@ BENCHMARK_METHODS["sunflow"]="org.sunflow.core.accel.KDTree.intersect,org.sunflo
 #BENCHMARK_METHODS["tomcat"]="org.dacapo.harness.TeeOutputStream.write,org.dacapo.tomcat.Page.writeLog,sun.nio.cs.StreamEncoder.implClose,sun.nio.ch.SocketDispatcher.write0,sun.nio.cs.StreamEncoder.writeBytes"
 #BENCHMARK_METHODS["xalan"]="sun.nio.cs.StreamEncoder.writeBytes,sun.nio.cs.StreamEncoder.implWrite,sun.nio.cs.StreamEncoder.write,org.apache.xml.serializer.ToStream.characters,org.apache.xml.dtm.ref.DTMManagerDefault.getDTM"
 
-
 for benchmark in "${!BENCHMARK_METHODS[@]}"; do
     IFS=',' read -ra methods_array <<< "${BENCHMARK_METHODS[$benchmark]}"
+    if [ "$benchmark" == "sunflow" ]; then
+        sampling_rates=("${SUNFLOW_SAMPLING_RATES[@]}")
+    else
+        sampling_rates=("${DEFAULT_SAMPLING_RATES[@]}")
+    fi
     for method in "${methods_array[@]}"; do
         TARGET_METHOD="$method"
         for freq in "${AVAILABLE_FREQS[@]}"; do
-            echo "Running benchmark '$benchmark' with TARGET_METHOD='$TARGET_METHOD' at frequency $freq"
-            tmp_output=$(mktemp)
-            mx --java-home=/openjdk-21/build/linux-x86_64-server-release/images/jdk \
-               -J-Djava.library.path=/workspace/graal/vincent:$EFLECT_EXPERIMENTS/resources/bin \
-               vm \
-               -Dgraal.DVFSFrequency="$freq" -Dgraal.EnableDVFSCounterSampling=true -Dgraal.SampleRate=50000 \
-               --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
-               -javaagent:../joonhwan/agent-joon.jar="$TARGET_METHOD" \
-               -cp "$DEPS_CP" \
-               Harness \
-               -c joonhwan.dacapo_callback.EnergyCallback \
-               "$benchmark" -n $ITERATIONS > "$tmp_output" 2>&1
-            measurement_line=$(grep "Measurement iteration:" "$tmp_output")
-            if [ -n "$measurement_line" ]; then
-                duration=$(echo "$measurement_line" | grep -oP '(?<=Duration = )\d+(?= ms)')
-                energy=$(echo "$measurement_line" | grep -oP '(?<=Energy = )\d+(?= micro joules)')
-                echo "Parsed results: Duration = ${duration} ms, Energy = ${energy} micro joules"
-            else
-                echo "No measurement iteration found for benchmark '$benchmark'."
-            fi
-            rm "$tmp_output"
+            for sr in "${sampling_rates[@]}"; do
+                echo "Running benchmark '$benchmark' with TARGET_METHOD='$TARGET_METHOD', frequency=$freq, sample rate=$sr"
+                tmp_output=$(mktemp)
+                mx --java-home=/openjdk-21/build/linux-x86_64-server-release/images/jdk \
+                   -J-Djava.library.path=/workspace/graal/vincent:$EFLECT_EXPERIMENTS/resources/bin \
+                   vm \
+                   -Dgraal.DVFSFrequency="$freq" -Dgraal.EnableDVFSCounterSampling=true -Dgraal.SampleRate="$sr" \
+                   --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
+                   -javaagent:../joonhwan/agent-joon.jar="$TARGET_METHOD" \
+                   -cp "$DEPS_CP" \
+                   Harness \
+                   -c joonhwan.dacapo_callback.EnergyCallback \
+                   "$benchmark" -n $ITERATIONS > "$tmp_output" 2>&1
+                measurement_line=$(grep "Measurement iteration:" "$tmp_output")
+                if [ -n "$measurement_line" ]; then
+                    duration=$(echo "$measurement_line" | grep -oP '(?<=Duration = )\d+(?= ms)')
+                    energy=$(echo "$measurement_line" | grep -oP '(?<=Energy = )\d+(?= micro joules)')
+                    echo "Parsed results: Duration = ${duration} ms, Energy = ${energy} micro joules"
+                else
+                    echo "No measurement iteration found for benchmark '$benchmark'."
+                fi
+                rm "$tmp_output"
+            done
         done
     done
 done
