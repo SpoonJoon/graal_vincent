@@ -31,6 +31,6 @@ public class EnergyCallback extends Callback {
   @Override
   public void complete(String benchmark, boolean valid) {
     super.complete(benchmark, valid);
-    System.out.println("Callback complete: " + benchmark + " " + (valid ? "PASSED" : "FAILED");
+    System.out.println("Callback complete: " + benchmark + " " + (valid ? "PASSED" : "FAILED"));
   }
 }
