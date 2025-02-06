@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.SCALE_CPU_FREQ;
-import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.JAVA_TIME_NANOS;
+import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.RESTORE_GOVERNOR;
 
 import java.util.Optional;
 
@@ -185,9 +185,8 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             merge.addForwardEnd(instrumentationEnd);
             merge.addForwardEnd(skipEnd);
 
-            ValueNode scalingFreq = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(1600000), StampFactory.forKind(JavaKind.Int)));
             // Connect instrumentationBegin to startTime
-            ForeignCallNode endTime = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
+            ForeignCallNode endTime = graph.add(new ForeignCallNode(RESTORE_GOVERNOR));
             graph.addAfterFixed(instrumentationBegin, endTime);
            
             ValueNode zeroConstantNode = graph.addWithoutUnique(new ConstantNode(JavaConstant.forInt(0), StampFactory.forKind(JavaKind.Int)));

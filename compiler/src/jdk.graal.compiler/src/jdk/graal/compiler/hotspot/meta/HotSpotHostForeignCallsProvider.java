@@ -184,6 +184,7 @@ public abstract class HotSpotHostForeignCallsProvider extends HotSpotForeignCall
     public static final HotSpotForeignCallDescriptor DVFS_TEST = new HotSpotForeignCallDescriptor(LEAF_NO_VZERO, NO_SIDE_EFFECT, NO_LOCATIONS, "dvfsTest", long.class);
 
     public static final HotSpotForeignCallDescriptor SCALE_CPU_FREQ = new HotSpotForeignCallDescriptor(LEAF, HAS_SIDE_EFFECT, NO_LOCATIONS, "scaleCpuFreq", long.class, long.class);
+    public static final HotSpotForeignCallDescriptor RESTORE_GOVERNOR = new HotSpotForeignCallDescriptor(LEAF, HAS_SIDE_EFFECT, NO_LOCATIONS, "restoreGovernor", long.class, long.class);
     // public static final HotSpotForeignCallDescriptor SCALE_CPU_FREQ = new HotSpotForeignCallDescriptor(LEAF_NO_VZERO, HAS_SIDE_EFFECT, NO_LOCATIONS, "scaleCpuFreq", long.class, long.class);
 
     public static final HotSpotForeignCallDescriptor NOTIFY = new HotSpotForeignCallDescriptor(LEAF_NO_VZERO, HAS_SIDE_EFFECT, any(), "object_notify", int.class, Word.class, Object.class);
@@ -524,6 +525,7 @@ public abstract class HotSpotHostForeignCallsProvider extends HotSpotForeignCall
         // declared in vmStructs_jvmci.cpp in HotSpot source 
         registerForeignCall(DVFS_TEST, c.dvfsTestAddress, NativeCall);
         registerForeignCall(SCALE_CPU_FREQ, c.scaleCpuFreqAddress, NativeCall);
+        registerForeignCall(RESTORE_GOVERNOR, c.restoreGovernorAddress, NativeCall);
 
         registerMathStubs(c, providers, options);
 
