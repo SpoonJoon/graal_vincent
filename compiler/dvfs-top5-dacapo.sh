@@ -26,19 +26,14 @@ BENCHMARK_METHODS["sunflow"]="org.sunflow.core.accel.KDTree.intersect,org.sunflo
 #BENCHMARK_METHODS["tomcat"]="org.dacapo.harness.TeeOutputStream.write,org.dacapo.tomcat.Page.writeLog,sun.nio.cs.StreamEncoder.implClose,sun.nio.ch.SocketDispatcher.write0,sun.nio.cs.StreamEncoder.writeBytes"
 #BENCHMARK_METHODS["xalan"]="sun.nio.cs.StreamEncoder.writeBytes,sun.nio.cs.StreamEncoder.implWrite,sun.nio.cs.StreamEncoder.write,org.apache.xml.serializer.ToStream.characters,org.apache.xml.dtm.ref.DTMManagerDefault.getDTM"
 
+
 for benchmark in "${!BENCHMARK_METHODS[@]}"; do
-    # Get the comma-delimited list for this benchmark.
-    methods_string="${BENCHMARK_METHODS[$benchmark]}"
-
-    # Split the string into an array.
-    IFS=',' read -ra methods_array <<< "$methods_string"
-
+    IFS=',' read -ra methods_array <<< "${BENCHMARK_METHODS[$benchmark]}"
     for method in "${methods_array[@]}"; do
         TARGET_METHOD="$method"
-        
         for freq in "${AVAILABLE_FREQS[@]}"; do
             echo "Running benchmark '$benchmark' with TARGET_METHOD='$TARGET_METHOD' at frequency $freq"
-            
+            tmp_output=$(mktemp)
             mx --java-home=/openjdk-21/build/linux-x86_64-server-release/images/jdk \
                -J-Djava.library.path=/workspace/graal/vincent:$EFLECT_EXPERIMENTS/resources/bin \
                vm \
@@ -48,7 +43,16 @@ for benchmark in "${!BENCHMARK_METHODS[@]}"; do
                -cp "$DEPS_CP" \
                Harness \
                -c joonhwan.dacapo_callback.EnergyCallback \
-               "$benchmark" -n 10 $ITERATIONS
+               "$benchmark" -n $ITERATIONS > "$tmp_output" 2>&1
+            measurement_line=$(grep "Measurement iteration:" "$tmp_output")
+            if [ -n "$measurement_line" ]; then
+                duration=$(echo "$measurement_line" | grep -oP '(?<=Duration = )\d+(?= ms)')
+                energy=$(echo "$measurement_line" | grep -oP '(?<=Energy = )\d+(?= micro joules)')
+                echo "Parsed results: Duration = ${duration} ms, Energy = ${energy} micro joules"
+            else
+                echo "No measurement iteration found for benchmark '$benchmark'."
+            fi
+            rm "$tmp_output"
         done
     done
 done
