@@ -13,7 +13,8 @@ AVAILABLE_FREQS=(2201000 2200000 2100000 2000000 1900000 1800000 1700000 1600000
 DEFAULT_SAMPLING_RATES=(1 10 100 1000 10000)
 SUNFLOW_SAMPLING_RATES=(100 1000 10000 100000 500000)
 ITERATIONS=20
-RUNS=10 # number of "cold runs" coined by David Liu 
+# number of "cold runs" coined by David Liu 
+RUNS=10 
 
 OUTPUT_DIR="/workspace/graal_vincent/compiler/dvfs-output"
 mkdir -p "$OUTPUT_DIR"
@@ -56,7 +57,7 @@ for benchmark in "${!BENCHMARK_METHODS[@]}"; do
                        vm \
                        -Dgraal.DVFSFrequency="$freq" -Dgraal.EnableDVFSCounterSampling=true -Dgraal.SampleRate="$sr" \
                        --add-opens jdk.graal.compiler/jdk.graal.compiler.hotspot.meta.joonhwan=ALL-UNNAMED \
-                       -javaagent:../joonhwan/agent-jo.jar="$TARGET_METHOD" \
+                       -javaagent:../joonhwan/agent-joon.jar="$TARGET_METHOD" \
                        -cp "$DEPS_CP" \
                        Harness \
                        -c joonhwan.dacapo_callback.EnergyCallback \
