@@ -62,6 +62,7 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
 
     private boolean shouldInstrumentDVFS(StructuredGraph graph) {
         String targetMethod = BuboCache.methodList.get(0);
+        
         String targetClassName = targetMethod.substring(0, targetMethod.lastIndexOf('.')).toLowerCase();
         String targetMethodName = targetMethod.substring(targetMethod.lastIndexOf('.') + 1);
     
@@ -72,21 +73,25 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             .replaceAll(";$", "");
         String currentMethodName = graph.method().getName();
     
-        // Print if either the class or method matches
+        System.err.println("Checking method: current class = [" + currentClassName +
+                           "], target class = [" + targetClassName +
+                           "], current method = [" + currentMethodName +
+                           "], target method = [" + targetMethodName + "]");
+        
         if (currentClassName.equals(targetClassName) || currentMethodName.equals(targetMethodName)) {
-            TTY.println("Match detected: Current class: " + currentClassName +
-                        " vs Target class: " + targetClassName +
-                        ", Current method: " + currentMethodName +
-                        " vs Target method: " + targetMethodName);
+            System.err.println("Partial match detected: current class/method = [" +
+                               currentClassName + "/" + currentMethodName + "]");
         }
     
         if (currentClassName.equals(targetClassName) && currentMethodName.equals(targetMethodName)) {
-            TTY.println("Found target method: " + targetMethod);
-            TTY.flush();
+            System.err.println("Found target method: " + targetMethod);
+            System.err.flush();
             return true;
         }
+        
         return false;
     }
+    
     
 
     // private boolean shouldInstrumentDVFS(StructuredGraph graph) {
