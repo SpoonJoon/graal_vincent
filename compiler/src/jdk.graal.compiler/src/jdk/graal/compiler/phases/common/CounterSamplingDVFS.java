@@ -73,19 +73,18 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
             .replaceAll(";$", "");
         String currentMethodName = graph.method().getName();
     
-        System.err.println("Checking method: current class = [" + currentClassName +
-                           "], target class = [" + targetClassName +
-                           "], current method = [" + currentMethodName +
-                           "], target method = [" + targetMethodName + "]");
+        // System.out.println("Checking method: current class = [" + currentClassName +
+        //                    "], target class = [" + targetClassName +
+        //                    "], current method = [" + currentMethodName +
+        //                    "], target method = [" + targetMethodName + "]");
         
-        if (currentClassName.equals(targetClassName) || currentMethodName.equals(targetMethodName)) {
-            System.err.println("Partial match detected: current class/method = [" +
-                               currentClassName + "/" + currentMethodName + "]");
-        }
+        // if (currentClassName.equals(targetClassName) || currentMethodName.equals(targetMethodName)) {
+        //     System.out.println("Partial match detected: current class/method = [" +
+        //                        currentClassName + "/" + currentMethodName + "]");
+        // }
     
         if (currentClassName.equals(targetClassName) && currentMethodName.equals(targetMethodName)) {
-            System.err.println("Found target method: " + targetMethod);
-            System.err.flush();
+            System.out.println("Found target method: " + targetMethod);
             return true;
         }
         
