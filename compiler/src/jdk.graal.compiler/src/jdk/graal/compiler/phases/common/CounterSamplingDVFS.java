@@ -21,6 +21,8 @@ import jdk.graal.compiler.nodes.java.StoreFieldNode;
 import jdk.graal.compiler.nodes.java.StoreIndexedNode;
 import jdk.graal.compiler.nodes.extended.BranchProbabilityNode;
 
+import jdk.graal.compiler.debug.TTY;
+
 import jdk.vm.ci.meta.JavaKind;
 import jdk.vm.ci.meta.JavaConstant;
 
@@ -59,28 +61,57 @@ public class CounterSamplingDVFS extends BasePhase<HighTierContext> {
     }
 
     private boolean shouldInstrumentDVFS(StructuredGraph graph) {
-        //This is loaded by a java agent
         String targetMethod = BuboCache.methodList.get(0);
-        String[] targetParts = targetMethod.split("\\.");
-        
-        // Normalize and compare class and method names
         String targetClassName = targetMethod.substring(0, targetMethod.lastIndexOf('.')).toLowerCase();
+        String targetMethodName = targetMethod.substring(targetMethod.lastIndexOf('.') + 1);
+    
         String currentClassName = graph.method().getDeclaringClass().getName()
             .replace('/', '.')
             .toLowerCase()
             .replaceAll("^l", "")
-            .replaceAll(";$", "");  // Remove trailing semicolon
+            .replaceAll(";$", "");
+        String currentMethodName = graph.method().getName();
     
-        String targetMethodName = targetParts[targetParts.length - 1];
-            
-        if (currentClassName.equals(targetClassName) && 
-            graph.method().getName().equals(targetMethodName)) {
-            System.out.println("Found target method: " + targetMethod);
+        // Print if either the class or method matches
+        if (currentClassName.equals(targetClassName) || currentMethodName.equals(targetMethodName)) {
+            TTY.println("Match detected: Current class: " + currentClassName +
+                        " vs Target class: " + targetClassName +
+                        ", Current method: " + currentMethodName +
+                        " vs Target method: " + targetMethodName);
+        }
+    
+        if (currentClassName.equals(targetClassName) && currentMethodName.equals(targetMethodName)) {
+            TTY.println("Found target method: " + targetMethod);
+            TTY.flush();
             return true;
         }
-        
         return false;
     }
+    
+
+    // private boolean shouldInstrumentDVFS(StructuredGraph graph) {
+    //     //This is loaded by a java agent
+    //     String targetMethod = BuboCache.methodList.get(0);
+    //     String[] targetParts = targetMethod.split("\\.");
+        
+    //     // Normalize and compare class and method names
+    //     String targetClassName = targetMethod.substring(0, targetMethod.lastIndexOf('.')).toLowerCase();
+    //     String currentClassName = graph.method().getDeclaringClass().getName()
+    //         .replace('/', '.')
+    //         .toLowerCase()
+    //         .replaceAll("^l", "")
+    //         .replaceAll(";$", "");  // Remove trailing semicolon
+    
+    //     String targetMethodName = targetParts[targetParts.length - 1];
+            
+    //     if (currentClassName.equals(targetClassName) && 
+    //         graph.method().getName().equals(targetMethodName)) {
+    //         System.out.println("Found target method: " + targetMethod);
+    //         return true;
+    //     }
+        
+    //     return false;
+    // }
 
     @Override
     @SuppressWarnings("try")

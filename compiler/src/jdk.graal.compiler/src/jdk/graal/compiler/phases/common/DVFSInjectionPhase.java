@@ -51,22 +51,11 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
             .toLowerCase()
             .replaceAll("^l", "")
             .replaceAll(";$", "");  // Remove trailing semicolon
-
-        String targetMethodName = targetParts[targetParts.length - 1]; 
-        String currentMethodName = graph.method().getName();
-        
-        if (currentClassName.equals(targetClassName) || currentMethodName.equals(targetMethodName)) {
-            System.err.println("Match detected: " +
-                "Current class: " + currentClassName + " vs Target class: " + targetClassName +
-                ", Current method: " + currentMethodName + " vs Target method: " + targetMethodName);
-
-            System.err.flush();
-        }
-
+    
+        String targetMethodName = targetParts[targetParts.length - 1];   
         if (currentClassName.equals(targetClassName) && 
             graph.method().getName().equals(targetMethodName)) {
-            System.err.println("Found target method: " + targetMethod);
-            System.err.flush();
+            System.out.println("Found target method: " + targetMethod);
             return true;
         }
         return false;
