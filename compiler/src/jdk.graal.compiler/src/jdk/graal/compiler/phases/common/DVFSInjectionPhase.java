@@ -56,14 +56,17 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         String currentMethodName = graph.method().getName();
         
         if (currentClassName.equals(targetClassName) || currentMethodName.equals(targetMethodName)) {
-            System.out.println("Match detected: " +
+            System.err.println("Match detected: " +
                 "Current class: " + currentClassName + " vs Target class: " + targetClassName +
                 ", Current method: " + currentMethodName + " vs Target method: " + targetMethodName);
+
+            System.err.flush();
         }
 
         if (currentClassName.equals(targetClassName) && 
             graph.method().getName().equals(targetMethodName)) {
-            System.out.println("Found target method: " + targetMethod);
+            System.err.println("Found target method: " + targetMethod);
+            System.err.flush();
             return true;
         }
         return false;
