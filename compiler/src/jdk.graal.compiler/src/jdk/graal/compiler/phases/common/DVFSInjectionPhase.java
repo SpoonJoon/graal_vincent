@@ -6,6 +6,7 @@ import jdk.graal.compiler.bytecode.Bytecode;
 import jdk.graal.compiler.bytecode.ResolvedJavaMethodBytecode;
 import jdk.graal.compiler.core.common.type.StampFactory;
 import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.SCALE_CPU_FREQ;
+import static jdk.graal.compiler.hotspot.meta.HotSpotHostForeignCallsProvider.RESTORE_GOVERNOR;
 import jdk.graal.compiler.hotspot.meta.joonhwan.BuboCache;
 import jdk.graal.compiler.nodes.ConstantNode;
 import jdk.graal.compiler.nodes.FixedNode;
@@ -85,7 +86,7 @@ public class DVFSInjectionPhase extends BasePhase<HighTierContext> {
         // graph.addAfterFixed(graph.start(), dvfsTest);
 
         for (ReturnNode returnNode : graph.getNodes(ReturnNode.TYPE)) {
-            ForeignCallNode dvfsTestRet = graph.add(new ForeignCallNode(SCALE_CPU_FREQ, scalingFreq));
+            ForeignCallNode dvfsTestRet = graph.add(new ForeignCallNode(RESTORE_GOVERNOR));
             Bytecode code = new ResolvedJavaMethodBytecode(graph.method());
             FrameState stateAfter = new FrameState(null, code, BytecodeFrame.AFTER_BCI, ValueNode.EMPTY_ARRAY, ValueNode.EMPTY_ARRAY, 0, null, null, ValueNode.EMPTY_ARRAY, null,
                                         FrameState.StackState.BeforePop);
