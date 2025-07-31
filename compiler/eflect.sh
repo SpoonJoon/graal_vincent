@@ -20,4 +20,5 @@ mx --java-home=/openjdk-21/build/linux-x86_64-server-release/images/jdk \
    -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints \
    Harness sunflow \
    -c eflect.experiments.ChappieEflectCallback \
+   -n 5 \
    --no-validation
